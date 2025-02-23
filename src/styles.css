@@ -1,0 +1,115 @@
+/* Estilos Globais */
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f0f0f5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container principal */
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+/* 📌 Menu Lateral */
+.menu {
+  width: 220px;
+  background-color: #2d2d2d;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.menu h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* 📌 Ícones de óculos organizados em 3 colunas */
+.glasses-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colunas */
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+}
+
+/* 📌 Estilo dos itens de óculos */
+.glasses-item {
+  background-color: white; /* Fundo branco */
+  border-radius: 8px; /* Bordas arredondadas */
+  padding: 5px; /* Espaçamento interno */
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, border 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px; /* Tamanho fixo do quadrado */
+  height: 60px;
+  border: 2px solid transparent;
+}
+
+/* 🟡 Efeito de destaque ao passar o mouse */
+.glasses-item:hover {
+  border: 2px solid #ffd700; /* Borda amarela no hover */
+  transform: scale(1.1);
+}
+
+/* 📌 Ajuste do tamanho da imagem dentro do ícone */
+.glasses-item img {
+  width: 80%; /* Ajusta o tamanho da imagem dentro do quadrado */
+  height: 80%;
+  object-fit: contain;
+}
+
+/* 📌 Área Principal */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.canvas-container {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+canvas {
+  border-radius: 10px;
+}
+
+/* 📌 Botão de Upload */
+.upload-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.upload-btn:hover {
+  background-color: #0056b3;
+}
+
+/* 📌 Indicador de Arrastar */
+.drag-instruction {
+  color: #333;
+  font-size: 14px;
+  margin-top: 10px;
+}
