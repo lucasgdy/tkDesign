@@ -1,7 +1,9 @@
 /* Estilos Globais */
+html,
 body {
   font-family: "Arial", sans-serif;
   background-color: #f0f0f5;
+  height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -15,7 +17,8 @@ body {
 
 /* 📌 Menu Lateral */
 .menu {
-  width: 220px;
+  width: 280px;
+  height: 94vh; /* Ocupa toda a altura da tela */
   background-color: #2d2d2d;
   color: white;
   padding: 20px;
@@ -23,6 +26,8 @@ body {
   flex-direction: column;
   align-items: center;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  flex-grow: 0; /* Não cresce */
+  flex-shrink: 0; /* Não encolhe */
 }
 
 .menu h2 {
@@ -39,6 +44,24 @@ body {
   justify-content: center;
   width: 100%;
   padding: 10px;
+  max-height: 100vh; /* Limita a altura do menu */
+  overflow-y: auto; /* Adiciona rolagem vertical */
+  scrollbar-width: thin; /* Para Firefox */
+  scrollbar-color: #888 #2d2d2d; /* Para Firefox */
+}
+
+/* Personalizando a barra de rolagem para navegadores WebKit */
+.glasses-options::-webkit-scrollbar {
+  width: 10px;
+}
+
+.glasses-options::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.glasses-options::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 /* 📌 Estilo dos itens de óculos */
@@ -101,6 +124,7 @@ canvas {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin-bottom: 20px; /* Adiciona espaço abaixo do botão */
 }
 
 .upload-btn:hover {
@@ -112,4 +136,28 @@ canvas {
   color: #333;
   font-size: 14px;
   margin-top: 10px;
+}
+
+/* 📌 Responsividade para telas menores */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .menu {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+  }
+
+  .glasses-options {
+    grid-template-columns: repeat(4, 1fr); /* Ajusta para 4 colunas */
+    max-height: 50vh;
+  }
+
+  .glasses-item {
+    width: 50px;
+    height: 50px;
+  }
 }

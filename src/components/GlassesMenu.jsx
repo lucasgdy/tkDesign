@@ -6,31 +6,15 @@ export default function GlassesMenu({ onSelect }) {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    const loadGlasses = async () => {
-      const glassesList = [];
+    const repoName = "tkDesign"; // Substitua pelo nome do seu repositório no GitHub
+    const basePath = `https://lucasgdy.github.io/${repoName}/oculos`;
 
-      for (let i = 1; i <= 8; i++) {
-        // Verifica até 20 imagens
-        const imagePath = `/oculos/oculos${i}.png`;
+    const glassesList = [];
+    for (let i = 1; i <= 206; i++) {
+      glassesList.push(`${basePath}/${i}.png`);
+    }
 
-        try {
-          const response = await fetch(imagePath, { method: "HEAD" }); // Verifica se a imagem existe
-          if (response.ok) {
-            glassesList.push(imagePath); // Adiciona apenas se a resposta for válida
-          }
-        } catch (error) {
-          console.error(`Erro ao verificar ${imagePath}:`, error);
-        }
-      }
-
-      if (glassesList.length > 0) {
-        setGlassesOptions(glassesList);
-      } else {
-        setGlassesOptions([]); // Evita mostrar imagens inválidas
-      }
-    };
-
-    loadGlasses();
+    setGlassesOptions(glassesList);
   }, []);
 
   const handleSelect = (glasses) => {

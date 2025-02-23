@@ -1,21 +1,22 @@
 import { useState, useRef, useEffect } from "react";
-import "../styles.css"; // Certifique-se de que este arquivo está importado corretamente
+import "../styles.css";
 
 export default function ImageUploader({ selectedGlasses }) {
   const [image, setImage] = useState(null);
+  const [backgroundImage, setBackgroundImage] = useState(null);
   const canvasRef = useRef(null);
 
   const FRAME_WIDTH = 1080;
   const FRAME_HEIGHT = 720;
 
-  // Estado para posição e tamanho dos óculos
   const [glassesPosition, setGlassesPosition] = useState({
     x: 400,
-    y: 250,
-    width: 100,
-    height: 50,
+    y: 150,
+    width: 280,
+    height: 140, // 🚀 Este valor será atualizado automaticamente ao carregar os óculos
   });
 
+  const [aspectRatio, setAspectRatio] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
@@ -24,60 +25,99 @@ export default function ImageUploader({ selectedGlasses }) {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImage(reader.result);
+        const img = new Image();
+        img.src = reader.result;
+        img.onload = () => {
+          setBackgroundImage(img);
+          setImage(reader.result);
+        };
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // 🚀 Redesenha a imagem de fundo corretamente mantendo a proporção
   useEffect(() => {
-    if (!image) return;
+    if (!backgroundImage) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = image;
 
-    img.onload = () => {
-      canvas.width = FRAME_WIDTH;
-      canvas.height = FRAME_HEIGHT;
+    canvas.width = FRAME_WIDTH;
+    canvas.height = FRAME_HEIGHT;
 
-      // Ajustar tamanho da imagem mantendo a proporção
-      let scale = Math.min(FRAME_WIDTH / img.width, FRAME_HEIGHT / img.height);
-      let newWidth = img.width * scale;
-      let newHeight = img.height * scale;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Centralizar imagem no Canvas
-      let xOffset = (FRAME_WIDTH - newWidth) / 2;
-      let yOffset = (FRAME_HEIGHT - newHeight) / 2;
+    const imgWidth = backgroundImage.width;
+    const imgHeight = backgroundImage.height;
+    const scale = Math.min(FRAME_WIDTH / imgWidth, FRAME_HEIGHT / imgHeight);
+    const newWidth = imgWidth * scale;
+    const newHeight = imgHeight * scale;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
+    const xOffset = (FRAME_WIDTH - newWidth) / 2;
+    const yOffset = (FRAME_HEIGHT - newHeight) / 2;
 
-      // Desenhar os óculos sem redimensionamento automático
-      if (selectedGlasses) {
-        const glassesImg = new Image();
-        glassesImg.src = selectedGlasses;
-        glassesImg.onload = () => {
-          ctx.drawImage(
-            glassesImg,
-            glassesPosition.x,
-            glassesPosition.y,
-            glassesPosition.width,
-            glassesPosition.height
-          );
-        };
-      }
+    ctx.drawImage(backgroundImage, xOffset, yOffset, newWidth, newHeight);
+  }, [backgroundImage]);
+
+  // 🚀 Corrige a distorção inicial ao carregar os óculos
+  useEffect(() => {
+    if (!selectedGlasses) return;
+
+    const glassesImg = new Image();
+    glassesImg.src = selectedGlasses;
+
+    glassesImg.onload = () => {
+      const realAspectRatio = glassesImg.width / glassesImg.height;
+
+      setAspectRatio(realAspectRatio);
+
+      setGlassesPosition((prev) => ({
+        ...prev,
+        height: prev.width / realAspectRatio, // 🚀 Atualiza a altura corretamente na primeira seleção
+      }));
     };
-  }, [image, selectedGlasses, glassesPosition]);
+  }, [selectedGlasses]);
 
-  // Iniciar movimento dos óculos
+  // 🚀 Redesenha os óculos sem apagar a imagem de fundo
+  useEffect(() => {
+    if (!backgroundImage || !selectedGlasses) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const imgWidth = backgroundImage.width;
+    const imgHeight = backgroundImage.height;
+    const scale = Math.min(FRAME_WIDTH / imgWidth, FRAME_HEIGHT / imgHeight);
+    const newWidth = imgWidth * scale;
+    const newHeight = imgHeight * scale;
+    const xOffset = (FRAME_WIDTH - newWidth) / 2;
+    const yOffset = (FRAME_HEIGHT - newHeight) / 2;
+
+    ctx.drawImage(backgroundImage, xOffset, yOffset, newWidth, newHeight);
+
+    const glassesImg = new Image();
+    glassesImg.src = selectedGlasses;
+
+    glassesImg.onload = () => {
+      ctx.drawImage(
+        glassesImg,
+        glassesPosition.x,
+        glassesPosition.y,
+        glassesPosition.width,
+        glassesPosition.height
+      );
+    };
+  }, [glassesPosition, selectedGlasses, backgroundImage]);
+
+  // 👉 Movimento com Mouse
   const handleMouseDown = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    // Verifica se o clique está sobre os óculos para mover
     if (
       mouseX >= glassesPosition.x &&
       mouseX <= glassesPosition.x + glassesPosition.width &&
@@ -92,34 +132,31 @@ export default function ImageUploader({ selectedGlasses }) {
     }
   };
 
-  // Movimento do mouse (mover)
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-
     const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    setGlassesPosition({
-      ...glassesPosition,
-      x: mouseX - offset.x,
-      y: mouseY - offset.y,
-    });
+    setGlassesPosition((prev) => ({
+      ...prev,
+      x: e.clientX - rect.left - offset.x,
+      y: e.clientY - rect.top - offset.y,
+    }));
   };
 
-  // Parar movimento
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  // Ajustar tamanho dos óculos com o scroll do mouse
+  // 📌 Zoom com Scroll do Mouse (mantendo proporção real)
   const handleWheel = (e) => {
     e.preventDefault();
-    setGlassesPosition((prev) => ({
-      ...prev,
-      width: Math.max(20, prev.width + e.deltaY * -0.1), // Ajusta o tamanho conforme o scroll
-      height: Math.max(10, prev.height + e.deltaY * -0.1), // Mantém proporção
-    }));
+    setGlassesPosition((prev) => {
+      const newWidth = Math.max(20, prev.width + e.deltaY * -0.1);
+      return {
+        ...prev,
+        width: newWidth,
+        height: aspectRatio ? newWidth / aspectRatio : prev.height,
+      };
+    });
   };
 
   return (
@@ -138,23 +175,29 @@ export default function ImageUploader({ selectedGlasses }) {
         style={{ display: "none" }}
       />
 
-      {/* 🔴 Aqui adicionamos o evento onWheel no Canvas */}
       <div className="canvas-container" onWheel={handleWheel}>
         <canvas
           ref={canvasRef}
-          className="border border-gray-300 my-4 rounded-lg shadow-lg"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
         ></canvas>
       </div>
 
-      {selectedGlasses && (
-        <p className="drag-instruction">
-          🖱️ Use o scroll para aumentar ou diminuir os óculos. 🖱️ Arraste os
-          óculos para ajustar a posição.
-        </p>
-      )}
+      <div className="instructions-container">
+        {selectedGlasses ? (
+          <p className="drag-instruction">
+            🖱️ Use o <strong>scroll do mouse</strong> ou{" "}
+            <strong>pinça com os dedos</strong> para ajustar o tamanho dos
+            óculos. 🖱️ <strong>Arraste os óculos</strong> para posicioná-los
+            corretamente.
+          </p>
+        ) : (
+          <p className="drag-instruction">
+            📸 Primeiro, escolha uma imagem para começar.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
